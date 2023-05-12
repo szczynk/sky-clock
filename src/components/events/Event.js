@@ -47,7 +47,15 @@ export default function Event({ eventData }) {
     })();
 
     const toggleNotificationSubscription = () => {
-        setSubscription(!isSubscribed);
+        if (typeof(Notification) === 'function' && Notification.permission !== 'granted') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    setSubscription(!isSubscribed);
+                }
+            });
+        } else {
+            setSubscription(!isSubscribed);
+        }
         setLastNotification(eventData.currentDate.getTime());
     }
 
