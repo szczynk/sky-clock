@@ -4,6 +4,7 @@ import "./Events.css";
 
 import { eventNames, eventDefinitions, eventTypeNames } from "../../event-data/event-data";
 import { getEventOffset } from "../../date-tools/event-time-offset";
+import Shard from "./Shard";
 
 export default function render({ currentDate }) {
 
@@ -85,7 +86,8 @@ export default function render({ currentDate }) {
                                     : getEventElement(eventData))
 
                     }
-                    <tr className="heading"><td colSpan="4">Shard Events: Randomized</td></tr>
+                    {/* <tr className="heading"><td colSpan="4">Shard Events: Randomized</td></tr> */}
+                    <Shard />
                 </tbody>
             </table>
         </div>
