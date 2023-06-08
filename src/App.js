@@ -38,8 +38,8 @@ function App() {
       <div className='main'>
         <main>
           <Clock date={currentDate}></Clock>
-          <Events currentDate={currentDate}></Events>
           <WeeklyReset currentDate={currentDate}></WeeklyReset>
+          <Events currentDate={currentDate}></Events>
         </main>
       </div>
           <Contributors></Contributors>
