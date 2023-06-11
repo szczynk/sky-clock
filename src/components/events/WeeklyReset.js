@@ -1,4 +1,4 @@
-import { add, format } from "date-fns";
+import { add, format, differenceInSeconds } from "date-fns";
 
 import "./WeeklyReset.css";
 
@@ -6,31 +6,36 @@ import { getMinutesToNextEvent } from "../../date-tools/event-time-offset";
 import { getFormattedSkyTime } from "../../date-tools/regional-time";
 import { weeklyReset } from "../../event-data/event-data";
 
-function calculateTimeRemaining(daysUntilReset, minutesToMidnight) {
-    // Convert days and minutes to total minutes
-    const totalMinutes = daysUntilReset * 24 * 60 + minutesToMidnight;
-
-    // Calculate the time components
-    const days = Math.floor(totalMinutes / (24 * 60));
-    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-    const minutes = totalMinutes % 60;
-
-    return { days, hours, minutes };
-}
-
 export default function render({ currentDate }) {
-    const currentDay = parseInt(getFormattedSkyTime(currentDate, 'i'));
+    const currentDayISO = parseInt(getFormattedSkyTime(currentDate, 'i'));
+    const currentDay = (currentDayISO % 7) + 1; // Map from ISO to JavaScript
 
     const eventData = weeklyReset;
     const minutesToMidnight = getMinutesToNextEvent(currentDate, eventData);
-    const daysUntilReset = minutesToMidnight === 0 ? 7 - currentDay : 6 - currentDay;
+    let daysUntilReset;
+
+    // If it's Sunday and the reset time hasn't passed, consider the reset as happening on the next Sunday
+    if (currentDay === 0 && minutesToMidnight < 24 * 60) {
+        daysUntilReset = 7;
+    } else {
+        daysUntilReset = (7 - currentDay) % 7; // Use modulo to ensure the result is within 0-6
+    }
 
     const nextEventDate = add(currentDate, { days: daysUntilReset, minutes: minutesToMidnight });
-    const { days, hours, minutes } = calculateTimeRemaining(daysUntilReset, minutesToMidnight);
+
+    // Calculate the difference in seconds
+    const diffInSeconds = differenceInSeconds(nextEventDate, currentDate);
+
+    // Calculate the remaining days, hours, and minutes
+    const remainingDays = Math.floor(diffInSeconds / (24 * 60 * 60));
+    const remainingHours = Math.floor((diffInSeconds % (24 * 60 * 60)) / (60 * 60));
+    const remainingMinutes = Math.floor((diffInSeconds % (60 * 60)) / 60);
+
     return (
         <div id="weekly-reset">
             {`Next weekly reset on ${format(nextEventDate, 'EEEE')} at ${format(nextEventDate, 'HH:mm')}`}
-            <div>{`Time to Next: ${days}d ${hours}h ${minutes}m`}</div>
+            <br/>
+            {`Time remaining: ${remainingDays}d ${remainingHours}h ${remainingMinutes}m`}
         </div>
     );
 }
