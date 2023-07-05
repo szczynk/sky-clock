@@ -5,6 +5,7 @@ import { faBell } from '@fortawesome/free-solid-svg-icons';
 
 import "./Event.css";
 import useLocalstorage from "../../hooks/localstorage";
+import { eventTypes } from "../../event-data/event-data";
 
 
 function buildNotification(eventData, minutesToNextEvent) {
@@ -19,7 +20,7 @@ function buildNotification(eventData, minutesToNextEvent) {
     return notification;
 }
 
-export default function Event({ eventData }) {
+export default function Event({ eventData, eventDataDailyReset }) {
     const notificationKey = `${eventData.key}-lastNotification`;
     const subscriptionKey = `${eventData.key}-isSubscribed`;
 
@@ -27,6 +28,9 @@ export default function Event({ eventData }) {
     const [isSubscribed, setSubscription] = useLocalstorage(subscriptionKey, false);
 
     const { date, hour, minute, hoursOffset, minutesOffset } = eventData.offsetData;
+
+    const hoursOffsetDailyReset = eventDataDailyReset.offsetData.hoursOffset;
+    const minutesOffsetDailyReset = eventDataDailyReset.offsetData.minutesOffset;
     
     (function showNotification() {
 
@@ -59,9 +63,54 @@ export default function Event({ eventData }) {
         setLastNotification(eventData.currentDate.getTime());
     }
 
+    const todoKey1 = `${eventData.key}-isDone1`;
+    const [isDone1, setTodo1] = useLocalstorage(todoKey1, false);
+    const toggleTodo1 = () => {
+        setTodo1(!isDone1);
+    };
+
+    const todoKey2 = `${eventData.key}-isDone2`;
+    const [isDone2, setTodo2] = useLocalstorage(todoKey2, false);
+    const toggleTodo2 = () => {
+        setTodo2(!isDone2);
+    };
+
+    (function resetTodo() {
+        const minutesToNextDailyReset = hoursOffsetDailyReset * 60 + minutesOffsetDailyReset;
+        const notificationWindow = eventData.notification?.minutes ?? 5;
+
+
+        const shouldResetTodos = (isDone1 || isDone2) &&
+            minutesToNextDailyReset <= notificationWindow
+    
+        // console.log({
+        //     eventName: eventData.name,
+        //     isDone1,
+        //     isDone2,
+        //     minutesToNextDailyReset,
+        //     notificationWindow,
+        //     shouldResetTodos,
+        // });
+
+        if (shouldResetTodos) {
+            setTodo1(false);
+            setTodo2(false);
+        }
+    })();
+
     return (
         <tr className="event">
-            <td className="notification"><FontAwesomeIcon className="bell" data-active={isSubscribed} icon={faBell} onClick={toggleNotificationSubscription} /></td>
+            <td className="notification">
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <FontAwesomeIcon className="bell" data-active={isSubscribed} icon={faBell} onClick={toggleNotificationSubscription} />
+                {
+                    eventData.type === eventTypes.WAX && <div style={{ marginLeft: 8 }}>
+                        <input type="checkbox" style={{ marginRight: 8, transform: 'scale(1.75)' }} checked={isDone1} onChange={toggleTodo1} />
+                        <input type="checkbox" style={{ marginLeft: 8, transform: 'scale(1.75)' }} checked={isDone2} onChange={toggleTodo2} />
+                    </div>
+                }
+                </div>
+            </td>
             <td>{eventData.name}</td>
             <td><Time hour={hour} minute={minute}></Time></td>
             <td>{`${hoursOffset}h ${minutesOffset}m`}</td>

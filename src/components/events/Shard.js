@@ -1,19 +1,20 @@
 import { useMemo } from 'react';
 import "./Shard.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
+import { getNowInSkyTime } from "../../date-tools/regional-time";
+import useLocalstorage from "../../hooks/localstorage";
+import { notify } from '../../services/notification-service';
 
-const dateFnsTz = require('date-fns-tz');
+
 const dateFns = require('date-fns');
 
 const duration = { hours: 3, minutes: 51, seconds: 20 };
 const earlySkyOffset = { minutes: 40, seconds: 50 };
 const gateShardOffset = { minutes: 8, seconds: 40 };
 
-function getNowInSky() {
-  return dateFnsTz.utcToZonedTime(new Date(), 'America/Los_Angeles');
-}
-
-function getShardData(daysToAdd = 0) {
-  const now = getNowInSky();
+function getShardData(getNowInSky, daysToAdd = 0) {
+  const now = getNowInSky;
   const today = dateFns.startOfDay(dateFns.addDays((now), daysToAdd));
   const dayOfMth = today.getDate();
   const dayOfWk = today.getDay();
@@ -68,8 +69,19 @@ function getShardData(daysToAdd = 0) {
   return { isRed, realm, map, rewards, sortedDates, daysAdded: daysToAdd };
 }
 
-function ShardRows({ partsKey, date }) {
-  const skyNow = getNowInSky();
+function buildNotification(eventName, minutesToNextEvent) {
+  const notification = {
+      title: 'Sky Clock',
+      body: `Event ${eventName} is about to begin!`,
+  };
+
+  notification.body = notification.body?.replace('{t}', minutesToNextEvent);
+
+  return notification;
+}
+
+function ShardRows({ getNowInSky, partsKey, date }) {
+  const skyNow = getNowInSky;
   const duration = dateFns.intervalToDuration({ start: skyNow, end: date });
   const localDate = dateFns.add(new Date(), { ...duration, seconds: duration.seconds + 1 });
   const { days, hours, minutes, seconds } = duration;
@@ -84,9 +96,53 @@ function ShardRows({ partsKey, date }) {
     gateShard: "Gate Shard",
   })[partsKey]
 
+  // console.log("partsKey:", partsKey)
+  // console.log("name:", name)
+  // console.log("date:", date)
+
+  const notificationKey = `${partsKey}-lastNotification`;
+  const subscriptionKey = `${partsKey}-isSubscribed`;
+
+  const [lastNotification, setLastNotification] = useLocalstorage(notificationKey, new Date().getTime());
+  const [isSubscribed, setSubscription] = useLocalstorage(subscriptionKey, false);
+
+  (function showNotification() {
+    const minutesToNextEvent = hours * 60 + minutes;
+    const notificationWindow = 5;
+
+    const shouldNotify = isSubscribed
+        && minutesToNextEvent <= notificationWindow
+        && lastNotification < skyNow.getTime()
+        && lastNotification < (date.getTime() - (notificationWindow + 1) * 60000);
+
+    if (shouldNotify) {
+        const notification = buildNotification(name, minutesToNextEvent);
+        notify(notification);
+
+        setLastNotification(skyNow.getTime());
+    }
+  })();
+
+  const toggleNotificationSubscription = () => {
+    if (typeof(Notification) === 'function' && Notification.permission !== 'granted') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                setSubscription(!isSubscribed);
+            }
+        });
+    } else {
+        setSubscription(!isSubscribed);
+    }
+    setLastNotification(skyNow.getTime());
+  }
+
   return (
     <tr className="event">
-      <td className="notification" />
+      <td className="notification">
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <FontAwesomeIcon className="bell" data-active={isSubscribed} icon={faBell} onClick={toggleNotificationSubscription} />
+          </div>
+      </td>
       <td>{name}</td>
       <td>{localStr}</td>
       <td>{relStr}</td>
@@ -94,18 +150,33 @@ function ShardRows({ partsKey, date }) {
   );
 }
 
-export default function Shard() {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { noShard, noMore, isRed, realm, map, rewards, sortedDates, daysAdded } = useMemo(() => getShardData(), [Math.floor(new Date().getSeconds() / 10)]); //Calculate every 10 seconds
-  const skippedDays = new Array(daysAdded).fill(0).map((_, days) => dateFns.format(dateFns.addDays(getNowInSky(), days), "do"));
+export default function Shard({ currentDate }) {
+  const getNowInSky = getNowInSkyTime(currentDate)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { noShard, noMore, isRed, realm, map, rewards, sortedDates, daysAdded } = useMemo(() => getShardData(getNowInSky), [Math.floor(new Date().getSeconds() / 10)]); //Calculate every 10 seconds
+  const skippedDays = new Array(daysAdded).fill(0).map((_, days) => dateFns.format(dateFns.addDays(getNowInSky, days), "do"));
+
+  // console.log(sortedDates)
 
   return (
     <>
       <tr className='heading'><td colSpan='4'>Shard Eruptions</td></tr>
-      {noMore && <tr className='shard-status'><td colSpan='4'>All shard eruptions on the {skippedDays.shift()} has ended</td></tr>}
-      {noShard && <tr className='shard-status'><td colSpan='4'>No Shard on the {skippedDays.join(', ')}. (╯°□°)╯︵ ┻━┻ </td></tr>}
-      {daysAdded > 0 && <tr className='heading'><td colSpan='4'> Shard eruptions for {dateFns.format(dateFns.addDays(getNowInSky(), daysAdded), "do 'of' MMM")} </td></tr>}
+      {
+        noMore && <tr className='shard-status'>
+          <td colSpan='4'>All shard eruptions on the {skippedDays.shift()} has ended</td>
+        </tr>
+      }
+      {
+        noShard && <tr className='shard-status'>
+          <td colSpan='4'>No Shard on the {skippedDays.join(', ')}. (╯°□°)╯︵ ┻━┻ </td>
+        </tr>
+      }
+      {
+        daysAdded > 0 && <tr className='heading'>
+          <td colSpan='4'> Shard eruptions for {dateFns.format(dateFns.addDays(getNowInSky, daysAdded), "do 'of' MMM")} </td>
+        </tr>
+      }
       <tr className='shard-detail'>
         <td colSpan='2'><strong>Realm: </strong>{realm}</td>
         <td colSpan='2'><strong>Color: </strong>{isRed ? 'Red' : 'Black'}</td>
@@ -114,7 +185,7 @@ export default function Shard() {
         <td colSpan='2'><strong>Map: </strong>{map}</td>
         <td colSpan='2'><strong>Rewards: </strong>{rewards}</td>
       </tr>
-      {sortedDates.map(([partsKey, date]) => <ShardRows key={partsKey} partsKey={partsKey} date={date} daysAdded={daysAdded} />)}
+      {sortedDates.map(([partsKey, date]) => <ShardRows getNowInSky={getNowInSky} key={partsKey} partsKey={partsKey} date={date} daysAdded={daysAdded} />)}
     </>
   );
 }

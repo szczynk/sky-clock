@@ -1,12 +1,13 @@
 import Event from "./Event";
-
 import "./Events.css";
 
-import { eventNames, eventDefinitions, eventTypeNames } from "../../event-data/event-data";
-import { getEventOffset } from "../../date-tools/event-time-offset";
 import Shard from "./Shard";
 
+import { eventNames, eventDefinitions, eventTypeNames, eventTypes } from "../../event-data/event-data";
+import { getEventOffset } from "../../date-tools/event-time-offset";
+
 export default function render({ currentDate }) {
+    let eventDataDailyReset
 
     function getEventData() {
         const eventKeyNames = Object.keys(eventNames);
@@ -34,9 +35,8 @@ export default function render({ currentDate }) {
         });
 
         let lastType = -1;
-
         const finalEventRecordset = [];
-
+        
         eventRecords.forEach((eventRecord) => {
             if (eventRecord.type !== lastType) {
                 finalEventRecordset.push({ group: eventTypeNames[eventRecord.type] });
@@ -45,6 +45,10 @@ export default function render({ currentDate }) {
             finalEventRecordset.push(eventRecord);
 
             lastType = eventRecord.type;
+
+            if (eventRecord.type === eventTypes.RESET) {
+                eventDataDailyReset = eventRecord
+            }
         });
 
         return finalEventRecordset;
@@ -58,13 +62,17 @@ export default function render({ currentDate }) {
         );
     }
 
-    function getEventElement(eventRecord) {
-        return (<Event eventData={eventRecord} key={eventRecord.key}></Event>)
+    function getEventElement(eventRecord, eventDataDailyReset) {
+        return (<Event eventData={eventRecord} eventDataDailyReset={eventDataDailyReset} key={eventRecord.key}></Event>)
     }
 
     function isGroupRecord(eventRecord) {
         return eventRecord.group !== undefined;
     }
+
+    const eventList = getEventData().map((eventData) =>
+        isGroupRecord(eventData) ? getGroupHeader(eventData) : getEventElement(eventData, eventDataDailyReset)
+    );
 
     return (
         <div className="events-table">
@@ -78,16 +86,9 @@ export default function render({ currentDate }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {
-                        getEventData()
-                            .map((eventData) =>
-                                isGroupRecord(eventData)
-                                    ? getGroupHeader(eventData)
-                                    : getEventElement(eventData))
-
-                    }
+                    {eventList}
                     {/* <tr className="heading"><td colSpan="4">Shard Events: Randomized</td></tr> */}
-                    <Shard />
+                    <Shard currentDate={currentDate} />
                 </tbody>
             </table>
         </div>
