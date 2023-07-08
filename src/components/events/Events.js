@@ -1,31 +1,26 @@
+import React from "react";
 import Event from "./Event";
-import "./Events.css";
-
 import Shard from "./Shard";
-
+import "./Events.css";
 import { eventNames, eventDefinitions, eventTypeNames, eventTypes } from "../../event-data/event-data";
 import { getEventOffset } from "../../date-tools/event-time-offset";
 
 export default function render({ currentDate }) {
-    let eventDataDailyReset
-
-    function getEventData() {
-        const eventKeyNames = Object.keys(eventNames);
-
-        const eventRecords = eventKeyNames.map((eventKeyName) => {
+    const getEventData = () => {
+        const eventRecords = Object.keys(eventNames).map((eventKeyName) => {
             const eventData = eventDefinitions[eventNames[eventKeyName]];
-
             eventData.offsetData = getEventOffset(eventData, currentDate);
             eventData.currentDate = currentDate;
-
             return eventData;
         });
 
         eventRecords.sort((eventRecord1, eventRecord2) => {
             if (eventRecord1.type > eventRecord2.type) {
                 return 1;
-            } else if (eventRecord1.type === eventRecord2.type &&
-                eventRecord1.offsetData.minutesToNextEvent > eventRecord2.offsetData.minutesToNextEvent) {
+            } else if (
+                eventRecord1.type === eventRecord2.type &&
+                eventRecord1.offsetData.minutesToNextEvent > eventRecord2.offsetData.minutesToNextEvent
+            ) {
                 return 1;
             } else if (eventRecord1.type === eventRecord2) {
                 return 0;
@@ -36,41 +31,39 @@ export default function render({ currentDate }) {
 
         let lastType = -1;
         const finalEventRecordset = [];
-        
+        let eventDataDailyReset;
+
         eventRecords.forEach((eventRecord) => {
             if (eventRecord.type !== lastType) {
                 finalEventRecordset.push({ group: eventTypeNames[eventRecord.type] });
             }
 
             finalEventRecordset.push(eventRecord);
-
             lastType = eventRecord.type;
 
             if (eventRecord.type === eventTypes.RESET) {
-                eventDataDailyReset = eventRecord
+                eventDataDailyReset = eventRecord;
             }
         });
 
-        return finalEventRecordset;
-    }
+        return { finalEventRecordset, eventDataDailyReset };
+    };
 
-    function getGroupHeader({ group: groupName }) {
-        return (
-            <tr className="heading" key={groupName}>
-                <td colSpan="4">{groupName}</td>
-            </tr>
-        );
-    }
+    const getGroupHeader = ({ group: groupName }) => (
+        <tr className="heading" key={groupName}>
+            <td colSpan="4">{groupName}</td>
+        </tr>
+    );
 
-    function getEventElement(eventRecord, eventDataDailyReset) {
-        return (<Event eventData={eventRecord} eventDataDailyReset={eventDataDailyReset} key={eventRecord.key}></Event>)
-    }
+    const getEventElement = (eventRecord, eventDataDailyReset) => (
+        <Event eventData={eventRecord} eventDataDailyReset={eventDataDailyReset} key={eventRecord.key} />
+    );
 
-    function isGroupRecord(eventRecord) {
-        return eventRecord.group !== undefined;
-    }
+    const isGroupRecord = (eventRecord) => eventRecord.group !== undefined;
 
-    const eventList = getEventData().map((eventData) =>
+    const { finalEventRecordset, eventDataDailyReset } = getEventData();
+
+    const eventList = finalEventRecordset.map((eventData) =>
         isGroupRecord(eventData) ? getGroupHeader(eventData) : getEventElement(eventData, eventDataDailyReset)
     );
 

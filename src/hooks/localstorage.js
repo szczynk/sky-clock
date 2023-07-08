@@ -1,26 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-function setLocalstorageItem(key, value) {
-        const valueString = JSON.stringify(value);
-        localStorage.setItem(key, valueString);
+function setLocalStorageItem(key, value) {
+    const valueString = JSON.stringify(value);
+    localStorage.setItem(key, valueString);
 }
 
-export default function useLocalstorage(key, initialValue = null) {
+export default function useLocalStorage(key, initialValue = null) {
     if (typeof key !== 'string') {
-        throw new Error('Localstorage key must be a string');
+        throw new Error('LocalStorage key must be a string');
     }
 
-    const storedValue = localStorage.getItem(key);
-    const parsedValue = Boolean(storedValue) ? JSON.parse(storedValue) : null;
-    const [value, setValue] = useState(parsedValue ?? initialValue);
+    const [value, setValue] = useState(() => {
+        const storedValue = localStorage.getItem(key);
+        return storedValue ? JSON.parse(storedValue) : initialValue;
+    });
 
-    setLocalstorageItem(key, value);
+    useEffect(() => {
+        setLocalStorageItem(key, value);
+    }, [key, value]);
 
-    function updateValue(value) {
-        if (typeof value !== 'undefined') {
-            setLocalstorageItem(key, value);
-            
-            setValue(value);
+    function updateValue(newValue) {
+        if (typeof newValue !== 'undefined') {
+            setLocalStorageItem(key, newValue);
+            setValue(newValue);
         }
     }
 

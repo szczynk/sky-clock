@@ -1,9 +1,10 @@
 import React from "react";
 
 function padTime(time) {
-    return time < 10 ? `0${time}` : time;
+    return time.toString().padStart(2, "0");
 }
 
 export default function render({ hour, minute, second = null }) {
-    return (<span className="time">{`${padTime(hour)}:${padTime(minute)}${second !== null ? (`:${padTime(second)}`) : ''}`}</span>);
+    const formattedTime = `${padTime(hour)}:${padTime(minute)}${second !== null ? `:${padTime(second)}` : ''}`;
+    return <span className="time">{formattedTime}</span>;
 }

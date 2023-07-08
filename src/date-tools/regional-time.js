@@ -1,5 +1,5 @@
-const dateFnsTz = require('date-fns-tz');
-const dateFns = require('date-fns');
+import { format } from 'date-fns';
+import { formatInTimeZone, utcToZonedTime } from 'date-fns-tz';
 
 const US_PACIFIC_TIME_ZONE = 'America/Los_Angeles';
 const TIME_PATTERN = 'HH:mm:ss';
@@ -15,21 +15,21 @@ function getTimeTokens(formattedTime) {
 }
 
 export function getLocalTime(date) {
-    const formattedTime = dateFns.format(date, TIME_PATTERN);
+    const formattedTime = format(date, TIME_PATTERN);
 
     return getTimeTokens(formattedTime);
 }
 
 export function getFormattedSkyTime(date, formatString) {
-    return dateFnsTz.formatInTimeZone(date, US_PACIFIC_TIME_ZONE, formatString);
+    return formatInTimeZone(date, US_PACIFIC_TIME_ZONE, formatString);
 }
 
 export function getNowInSkyTime(date) {
-    return dateFnsTz.utcToZonedTime(date, US_PACIFIC_TIME_ZONE);
+    return utcToZonedTime(date, US_PACIFIC_TIME_ZONE);
 }
 
 export function getSkyTime(date) {
-    const formattedTime = dateFnsTz.formatInTimeZone(date, US_PACIFIC_TIME_ZONE, TIME_PATTERN);
+    const formattedTime = formatInTimeZone(date, US_PACIFIC_TIME_ZONE, TIME_PATTERN);
 
     return getTimeTokens(formattedTime);
 }

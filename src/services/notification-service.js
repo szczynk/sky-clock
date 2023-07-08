@@ -1,4 +1,4 @@
-const supportsNotifications = typeof(Notification) === 'function';
+const supportsNotifications = 'Notification' in window;
 
 export function notify(notificationData) {
     if (!supportsNotifications) return;

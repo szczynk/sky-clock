@@ -1,118 +1,157 @@
-import Time from "../time/Time";
-import { notify } from '../../services/notification-service';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
 
-import "./Event.css";
-import useLocalstorage from "../../hooks/localstorage";
+import Time from "../time/Time";
+import { notify } from "../../services/notification-service";
+import useLocalStorage from "../../hooks/localstorage";
 import { eventTypes } from "../../event-data/event-data";
 
+import "./Event.css";
 
-function buildNotification(eventData, minutesToNextEvent) {
-    const notification = {
-        title: eventData.notification?.title ?? 'Sky Clock',
-        body: eventData.notification?.body ?? `Event ${eventData.name} is about to begin!`,
-        image: eventData.notification?.image
+function buildNotification(eventNotification, eventName, minutesToNextEvent) {
+    const title = eventNotification?.title ?? "Sky Clock";
+    const body = eventNotification?.body ?? `Event ${eventName} is about to begin!`;
+    const image = eventNotification?.image;
+
+    const modifiedBody = body.replace("{t}", minutesToNextEvent);
+
+    return {
+        title,
+        body: modifiedBody,
+        image,
     };
-
-    notification.body = notification.body?.replace('{t}', minutesToNextEvent);
-
-    return notification;
 }
 
-export default function Event({ eventData, eventDataDailyReset }) {
-    const notificationKey = `${eventData.key}-lastNotification`;
-    const subscriptionKey = `${eventData.key}-isSubscribed`;
+export default function Event({ eventData: {
+        key,
+        offsetData,
+        currentDate,
+        name,
+        type,
+        notification
+    },
+    eventDataDailyReset
+}) {
+    const { date, hour, minute, hoursOffset, minutesOffset } = offsetData;
 
-    const [lastNotification, setLastNotification] = useLocalstorage(notificationKey, new Date().getTime());
-    const [isSubscribed, setSubscription] = useLocalstorage(subscriptionKey, false);
+    const notificationKey = `${key}-lastNotification`;
+    const subscriptionKey = `${key}-isSubscribed`;
 
-    const { date, hour, minute, hoursOffset, minutesOffset } = eventData.offsetData;
+    const [lastNotification, setLastNotification] = useLocalStorage(
+        notificationKey,
+        new Date().getTime()
+    );
+    const [isSubscribed, setSubscription] = useLocalStorage(subscriptionKey, false);
 
-    const hoursOffsetDailyReset = eventDataDailyReset.offsetData.hoursOffset;
-    const minutesOffsetDailyReset = eventDataDailyReset.offsetData.minutesOffset;
-    
-    (function showNotification() {
-
-        const minutesToNextEvent = hoursOffset * 60 + minutesOffset;
-        const notificationWindow = eventData.notification?.minutes ?? 5;
-
-        const shouldNotify = isSubscribed
-            && minutesToNextEvent <= notificationWindow
-            && lastNotification < eventData.currentDate.getTime()
-            && lastNotification < (date.getTime() - (notificationWindow + 1) * 60000);
-
-        if (shouldNotify) {
-            const notification = buildNotification(eventData, minutesToNextEvent);
-            notify(notification);
-
-            setLastNotification(eventData.currentDate.getTime());
+    const {
+        currentDate: currentDateDailyReset,
+        offsetData: {
+            date: dateDailyReset,
+            hoursOffset: hoursOffsetDailyReset,
+            minutesOffset: minutesOffsetDailyReset
         }
-    })();
+    } = eventDataDailyReset;
+
+    useEffect(() => {
+        function showNotification() {
+            const minutesToNextEvent = hoursOffset * 60 + minutesOffset;
+            const notificationWindow = notification?.minutes ?? 5;
+
+            const shouldNotify =
+                isSubscribed &&
+                minutesToNextEvent <= notificationWindow &&
+                lastNotification < currentDate.getTime() &&
+                lastNotification < date.getTime() - (notificationWindow + 1) * 60000;
+
+            if (shouldNotify) {
+                const notif = buildNotification(notification, name, minutesToNextEvent);
+                notify(notif);
+
+                setLastNotification(currentDate.getTime());
+            }
+        }
+
+        showNotification();
+    }, [currentDate, date, isSubscribed, hoursOffset, minutesOffset, notification, name, lastNotification, setLastNotification]);
 
     const toggleNotificationSubscription = () => {
-        if (typeof(Notification) === 'function' && Notification.permission !== 'granted') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
+        if (typeof Notification === "function" && Notification.permission !== "granted") {
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
                     setSubscription(!isSubscribed);
                 }
             });
         } else {
             setSubscription(!isSubscribed);
         }
-        setLastNotification(eventData.currentDate.getTime());
-    }
+        setLastNotification(currentDate.getTime());
+    };
 
-    const todoKey1 = `${eventData.key}-isDone1`;
-    const [isDone1, setTodo1] = useLocalstorage(todoKey1, false);
+    const todoKey1 = `${key}-isDone1`;
+    const [isDone1, setTodo1] = useLocalStorage(todoKey1, false);
     const toggleTodo1 = () => {
         setTodo1(!isDone1);
     };
 
-    const todoKey2 = `${eventData.key}-isDone2`;
-    const [isDone2, setTodo2] = useLocalstorage(todoKey2, false);
+    const todoKey2 = `${key}-isDone2`;
+    const [isDone2, setTodo2] = useLocalStorage(todoKey2, false);
     const toggleTodo2 = () => {
         setTodo2(!isDone2);
     };
 
-    (function resetTodo() {
-        const minutesToNextDailyReset = hoursOffsetDailyReset * 60 + minutesOffsetDailyReset;
-        const notificationWindow = eventData.notification?.minutes ?? 5;
+    useEffect(() => {
+        function resetTodo() {
+            const minutesToNextDailyReset = hoursOffsetDailyReset * 60 + minutesOffsetDailyReset;
+            const resetNotificationWindow = notification?.minutes ?? 5;
 
+            const shouldResetTodos =
+                (isDone1 || isDone2) &&
+                minutesToNextDailyReset <= resetNotificationWindow &&
+                lastNotification < currentDateDailyReset.getTime() &&
+                lastNotification < dateDailyReset.getTime() - (resetNotificationWindow + 1) * 60000;
 
-        const shouldResetTodos = (isDone1 || isDone2) &&
-            minutesToNextDailyReset <= notificationWindow
-    
-        // console.log({
-        //     eventName: eventData.name,
-        //     isDone1,
-        //     isDone2,
-        //     minutesToNextDailyReset,
-        //     notificationWindow,
-        //     shouldResetTodos,
-        // });
-
-        if (shouldResetTodos) {
-            setTodo1(false);
-            setTodo2(false);
+            if (shouldResetTodos) {
+                setTodo1(false);
+                setTodo2(false);
+            }
         }
-    })();
+
+        resetTodo();
+    }, [isDone1, isDone2, notification, lastNotification, setTodo1, setTodo2, hoursOffsetDailyReset, minutesOffsetDailyReset, currentDateDailyReset, dateDailyReset]);
 
     return (
         <tr className="event">
             <td className="notification">
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FontAwesomeIcon className="bell" data-active={isSubscribed} icon={faBell} onClick={toggleNotificationSubscription} />
-                {
-                    eventData.type === eventTypes.WAX && <div style={{ marginLeft: 8 }}>
-                        <input type="checkbox" style={{ marginRight: 8, transform: 'scale(1.75)' }} checked={isDone1} onChange={toggleTodo1} />
-                        <input type="checkbox" style={{ marginLeft: 8, transform: 'scale(1.75)' }} checked={isDone2} onChange={toggleTodo2} />
+                <div style={{ display: "flex", alignItems: "center" }}>
+                <FontAwesomeIcon
+                    className="bell"
+                    data-active={isSubscribed}
+                    icon={faBell}
+                    onClick={toggleNotificationSubscription}
+                />
+                {type === eventTypes.WAX && (
+                    <div style={{ marginLeft: 8 }}>
+                    <input
+                        type="checkbox"
+                        style={{ marginRight: 8, transform: "scale(1.75)" }}
+                        checked={isDone1}
+                        onChange={toggleTodo1}
+                    />
+                    <input
+                        type="checkbox"
+                        style={{ marginLeft: 8, transform: "scale(1.75)" }}
+                        checked={isDone2}
+                        onChange={toggleTodo2}
+                    />
                     </div>
-                }
+                )}
                 </div>
             </td>
-            <td>{eventData.name}</td>
-            <td><Time hour={hour} minute={minute}></Time></td>
+            <td>{name}</td>
+            <td>
+                <Time hour={hour} minute={minute} />
+            </td>
             <td>{`${hoursOffset}h ${minutesOffset}m`}</td>
         </tr>
     );
