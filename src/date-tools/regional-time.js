@@ -24,12 +24,12 @@ export function getFormattedSkyTime(date, formatString) {
     return formatInTimeZone(date, US_PACIFIC_TIME_ZONE, formatString);
 }
 
-export function getNowInSkyTime(date) {
-    return utcToZonedTime(date, US_PACIFIC_TIME_ZONE);
-}
-
 export function getSkyTime(date) {
     const formattedTime = formatInTimeZone(date, US_PACIFIC_TIME_ZONE, TIME_PATTERN);
 
     return getTimeTokens(formattedTime);
+}
+
+export function getNowInSkyTime() {
+    return utcToZonedTime(new Date(), US_PACIFIC_TIME_ZONE);
 }

@@ -23,15 +23,16 @@ function buildNotification(eventNotification, eventName, minutesToNextEvent) {
     };
 }
 
-export default function Event({ eventData: {
+export default function Event({
+    eventData: {
         key,
         offsetData,
         currentDate,
         name,
         type,
-        notification
+        notification,
     },
-    eventDataDailyReset
+    eventDataDailyReset,
 }) {
     const { date, hour, minute, hoursOffset, minutesOffset } = offsetData;
 
@@ -49,8 +50,8 @@ export default function Event({ eventData: {
         offsetData: {
             date: dateDailyReset,
             hoursOffset: hoursOffsetDailyReset,
-            minutesOffset: minutesOffsetDailyReset
-        }
+            minutesOffset: minutesOffsetDailyReset,
+        },
     } = eventDataDailyReset;
 
     useEffect(() => {
@@ -72,7 +73,9 @@ export default function Event({ eventData: {
             }
         }
 
-        showNotification();
+        const intervalId = setInterval(showNotification, 60 * 1000);
+
+        return () => clearInterval(intervalId);
     }, [currentDate, date, isSubscribed, hoursOffset, minutesOffset, notification, name, lastNotification, setLastNotification]);
 
     const toggleNotificationSubscription = () => {
@@ -117,7 +120,9 @@ export default function Event({ eventData: {
             }
         }
 
-        resetTodo();
+        const intervalId = setInterval(resetTodo, 60 * 1000);
+
+        return () => clearInterval(intervalId);
     }, [isDone1, isDone2, notification, lastNotification, setTodo1, setTodo2, hoursOffsetDailyReset, minutesOffsetDailyReset, currentDateDailyReset, dateDailyReset]);
 
     return (

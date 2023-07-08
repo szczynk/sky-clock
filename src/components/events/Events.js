@@ -81,7 +81,7 @@ export default function render({ currentDate }) {
                 <tbody>
                     {eventList}
                     {/* <tr className="heading"><td colSpan="4">Shard Events: Randomized</td></tr> */}
-                    <Shard currentDate={currentDate} />
+                    <Shard />
                 </tbody>
             </table>
         </div>

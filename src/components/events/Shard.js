@@ -11,8 +11,9 @@ const duration = { hours: 3, minutes: 51, seconds: 20 };
 const earlySkyOffset = { minutes: 40, seconds: 50 };
 const gateShardOffset = { minutes: 8, seconds: 40 };
 
-function getShardData(getNowInSky, daysToAdd = 0) {
-    const now = getNowInSky;
+function getShardData(daysToAdd = 0) {
+    const now = getNowInSkyTime();
+    console.log("getShardData, now: ",now)
     const today = dateFns.startOfDay(dateFns.addDays((now), daysToAdd));
     const dayOfMth = today.getDate();
     const dayOfWk = today.getDay();
@@ -78,8 +79,8 @@ function buildNotification(eventName, minutesToNextEvent) {
     return notification;
 }
 
-function ShardRows({ getNowInSky, partsKey, date }) {
-    const skyNow = getNowInSky;
+function ShardRows({ partsKey, date }) {
+    const skyNow = getNowInSkyTime();
     const duration = dateFns.intervalToDuration({ start: skyNow, end: date });
     const localDate = dateFns.add(new Date(), { ...duration, seconds: duration.seconds + 1 });
     const { days, hours, minutes, seconds } = duration;
@@ -118,7 +119,9 @@ function ShardRows({ getNowInSky, partsKey, date }) {
             }
         }
 
-        showNotification();
+        const intervalId = setInterval(showNotification, 60 * 1000);
+
+        return () => clearInterval(intervalId);
     }, [date, isSubscribed, lastNotification, name, setLastNotification, setSubscription, skyNow, hours, minutes]);
 
     const toggleNotificationSubscription = () => {
@@ -148,12 +151,10 @@ function ShardRows({ getNowInSky, partsKey, date }) {
     );
 }
 
-export default function Shard({ currentDate }) {
-    const getNowInSky = useMemo(() => getNowInSkyTime(currentDate), [currentDate]);
+export default function Shard() {
+    const { noShard, noMore, isRed, realm, map, rewards, sortedDates, daysAdded } = useMemo(() => getShardData(), []);
 
-    const { noShard, noMore, isRed, realm, map, rewards, sortedDates, daysAdded } = useMemo(() => getShardData(getNowInSky), [getNowInSky]);
-
-    const skippedDays = useMemo(() => new Array(daysAdded).fill(0).map((_, days) => dateFns.format(dateFns.addDays(getNowInSky, days), "do")), [daysAdded, getNowInSky]);
+    const skippedDays = useMemo(() => new Array(daysAdded).fill(0).map((_, days) => dateFns.format(dateFns.addDays(getNowInSkyTime(), days), "do")), [daysAdded]);
 
     return (
         <>
@@ -165,12 +166,12 @@ export default function Shard({ currentDate }) {
             }
             {
                 noShard && <tr className='shard-status'>
-                <td colSpan='4'>No Shard on the {skippedDays.join(', ')}. (╯°□°)╯︵ ┻━┻ </td>
+                <td colSpan='4'>No Shard on the <strong>{skippedDays.join(', ')}</strong>. (╯°□°)╯︵ ┻━┻ </td>
                 </tr>
             }
             {
                 daysAdded > 0 && <tr className='heading'>
-                <td colSpan='4'> Shard eruptions for {dateFns.format(dateFns.addDays(getNowInSky, daysAdded), "do 'of' MMM")} </td>
+                <td colSpan='4'> Shard eruptions for {dateFns.format(dateFns.addDays(getNowInSkyTime(), daysAdded), "do 'of' MMM")} </td>
                 </tr>
             }
             <tr className='shard-detail'>
@@ -181,7 +182,14 @@ export default function Shard({ currentDate }) {
                 <td colSpan='2'><strong>Map: </strong>{map}</td>
                 <td colSpan='2'><strong>Rewards: </strong>{rewards}</td>
             </tr>
-            {sortedDates.map(([partsKey, date]) => <ShardRows getNowInSky={getNowInSky} key={partsKey} partsKey={partsKey} date={date} daysAdded={daysAdded} />)}
+            {sortedDates.map(([partsKey, date]) => (
+                <ShardRows
+                    key={partsKey}
+                    partsKey={partsKey}
+                    date={date}
+                    daysAdded={daysAdded}
+                />
+            ))}
         </>
     );
 }
