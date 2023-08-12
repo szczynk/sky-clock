@@ -1,6 +1,5 @@
 import Time from "../time/Time";
 import { getLocalTime, getSkyTime } from "../../date-tools/regional-time";
-import React from "react";
 
 import "./Clock.css";
 

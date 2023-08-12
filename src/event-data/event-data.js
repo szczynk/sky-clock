@@ -80,7 +80,10 @@ const eventDefinitions = {
         type: eventTypes.ENVIRONMENT,
         period: 120,
         hour: hour => hour % 2,
-        minute: minute => 50 - minute
+        minute: minute => 50 - minute,
+        notification: {
+            body: 'Sunset in {t} minutes!'
+        }
     },
     [eventNames.FAIRY_RING]: {
         name: 'Fairy Ring',
@@ -88,7 +91,10 @@ const eventDefinitions = {
         type: eventTypes.ENVIRONMENT,
         period: 60,
         hour: () => 0,
-        minute: minute => 50 - minute
+        minute: minute => 50 - minute,
+        notification: {
+            body: 'Fairy Ring in {t} minutes!'
+        }
     },
     [eventNames.FOREST_RAINBOW]: {
         name: 'Forest Brook Rainbow',
@@ -96,7 +102,10 @@ const eventDefinitions = {
         type: eventTypes.ENVIRONMENT,
         period: 12 * 60,
         hour: hour => Math.abs(5 - hour) % 12,
-        minute: minute => 0 - minute
+        minute: minute => 0 - minute,
+        notification: {
+            body: 'Forest Brook Rainbow in {t} minutes!'
+        }
     },
     [eventNames.DAILY_RESET]: {
         name: 'Daily Reset',
@@ -104,7 +113,10 @@ const eventDefinitions = {
         type: eventTypes.RESET,
         period: 24 * 60,
         hour: hour => 24 - hour,
-        minute: minute => 0 - minute
+        minute: minute => 0 - minute,
+        notification: {
+            body: 'Daily Reset in {t} minutes!'
+        }
     },
     [eventNames.CONCERT_GRABSEATS]: {
         name: 'Grab Seats',
@@ -112,7 +124,10 @@ const eventDefinitions = {
         type: eventTypes.CONCERT,
         period: 4 * 60,
         hour: hour => hour % 4,
-        minute: minute => 0 - minute
+        minute: minute => 0 - minute,
+        notification: {
+            body: 'Grab Seats in {t} minutes!'
+        }
     },
     [eventNames.CONCERT_STARTS]: {
         name: 'Concert Starts',
@@ -120,7 +135,10 @@ const eventDefinitions = {
         type: eventTypes.CONCERT,
         period: 4 * 60,
         hour: hour => hour % 4,
-        minute: minute => 10 - minute
+        minute: minute => 10 - minute,
+        notification: {
+            body: 'Concert Starts in {t} minutes!'
+        }
     },
 };
 

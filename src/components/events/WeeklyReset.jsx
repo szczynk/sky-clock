@@ -1,6 +1,4 @@
 import { add, format, differenceInSeconds } from "date-fns";
-import React from "react";
-
 import "./WeeklyReset.css";
 import { getMinutesToNextEvent } from "../../date-tools/event-time-offset";
 import { getFormattedSkyTime } from "../../date-tools/regional-time";
