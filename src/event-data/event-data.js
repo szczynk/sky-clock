@@ -123,7 +123,7 @@ const eventDefinitions = {
         key: eventNames.CONCERT_GRABSEATS,
         type: eventTypes.CONCERT,
         period: 4 * 60,
-        hour: hour => hour % 4,
+        hour: (hour) => (2 + hour) % 4,
         minute: minute => 0 - minute,
         notification: {
             body: 'Grab Seats in {t} minutes!'
@@ -134,7 +134,7 @@ const eventDefinitions = {
         key: eventNames.CONCERT_STARTS,
         type: eventTypes.CONCERT,
         period: 4 * 60,
-        hour: hour => hour % 4,
+        hour: (hour) => (2 + hour) % 4,
         minute: minute => 10 - minute,
         notification: {
             body: 'Concert Starts in {t} minutes!'
