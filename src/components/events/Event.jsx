@@ -25,7 +25,7 @@ function buildNotification(eventNotification, eventName, minutesToNextEvent) {
 
 function Checkboxes({ isDone1, isDone2, toggleTodo1, toggleTodo2 }) {
   return (
-    <div style={{ marginLeft: 8 }}>
+    <div style={{ display: "flex", marginLeft: 8 }}>
       <input
         type="checkbox"
         style={{
