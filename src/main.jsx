@@ -4,6 +4,19 @@ import App from "./App.jsx";
 import "./index.css";
 import "./Properties.css";
 import reportWebVitals from "./reportWebVitals";
+import { registerSW } from "virtual:pwa-register";
+
+// add this to prompt for a refresh
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm("New content available. Reload?")) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log("offline ready");
+  },
+});
 
 // Strict mode removed to eliminate annoying double render.
 // The source below was saved as a reminder in case I want/need to put it back
