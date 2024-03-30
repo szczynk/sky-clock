@@ -4,13 +4,17 @@ export const eventNames = {
     GEYSER: 'geyser',
     GRANDMA: 'grandma',
     TURTLE: 'turtle',
-    SUNSET: 'sunset',
+
     // SHARD: 'shard',
-    FAIRY_RING: 'fairyRing',
-    FOREST_RAINBOW: 'forestRainbow',
+
+    // SUNSET: 'sunset',
+    // FAIRY_RING: 'fairyRing',
+    // FOREST_RAINBOW: 'forestRainbow',
+
     DAILY_RESET: 'dailyReset',
-    CONCERT_GRABSEATS: 'grabSeats',
-    CONCERT_STARTS: 'concertStarts'
+
+    // CONCERT_GRABSEATS: 'grabSeats',
+    // CONCERT_STARTS: 'concertStarts'
 };
 
 export const eventTypes = {
@@ -74,39 +78,39 @@ const eventDefinitions = {
             image: '/images/events/shard.jpg'
         }
     },
-    // [eventNames.SUNSET]: {
-    //     name: 'Sunset',
-    //     key: eventNames.SUNSET,
-    //     type: eventTypes.ENVIRONMENT,
-    //     period: 120,
-    //     hour: hour => hour % 2,
-    //     minute: minute => 50 - minute,
-    //     notification: {
-    //         body: 'Sunset in {t} minutes!'
-    //     }
-    // },
-    // [eventNames.FAIRY_RING]: {
-    //     name: 'Fairy Ring',
-    //     key: eventNames.FAIRY_RING,
-    //     type: eventTypes.ENVIRONMENT,
-    //     period: 60,
-    //     hour: () => 0,
-    //     minute: minute => 50 - minute,
-    //     notification: {
-    //         body: 'Fairy Ring in {t} minutes!'
-    //     }
-    // },
-    // [eventNames.FOREST_RAINBOW]: {
-    //     name: 'Forest Brook Rainbow',
-    //     key: eventNames.FOREST_RAINBOW,
-    //     type: eventTypes.ENVIRONMENT,
-    //     period: 12 * 60,
-    //     hour: hour => Math.abs(5 - hour) % 12,
-    //     minute: minute => 0 - minute,
-    //     notification: {
-    //         body: 'Forest Brook Rainbow in {t} minutes!'
-    //     }
-    // },
+    [eventNames.SUNSET]: {
+        name: 'Sunset',
+        key: eventNames.SUNSET,
+        type: eventTypes.ENVIRONMENT,
+        period: 120,
+        hour: hour => hour % 2,
+        minute: minute => 50 - minute,
+        notification: {
+            body: 'Sunset in {t} minutes!'
+        }
+    },
+    [eventNames.FAIRY_RING]: {
+        name: 'Fairy Ring',
+        key: eventNames.FAIRY_RING,
+        type: eventTypes.ENVIRONMENT,
+        period: 60,
+        hour: () => 0,
+        minute: minute => 50 - minute,
+        notification: {
+            body: 'Fairy Ring in {t} minutes!'
+        }
+    },
+    [eventNames.FOREST_RAINBOW]: {
+        name: 'Forest Brook Rainbow',
+        key: eventNames.FOREST_RAINBOW,
+        type: eventTypes.ENVIRONMENT,
+        period: 12 * 60,
+        hour: hour => Math.abs(5 - hour) % 12,
+        minute: minute => 0 - minute,
+        notification: {
+            body: 'Forest Brook Rainbow in {t} minutes!'
+        }
+    },
     [eventNames.DAILY_RESET]: {
         name: 'Daily Reset',
         key: eventNames.DAILY_RESET,
@@ -118,28 +122,28 @@ const eventDefinitions = {
             body: 'Daily Reset in {t} minutes!'
         }
     },
-    // [eventNames.CONCERT_GRABSEATS]: {
-    //     name: 'Grab Seats',
-    //     key: eventNames.CONCERT_GRABSEATS,
-    //     type: eventTypes.CONCERT,
-    //     period: 4 * 60,
-    //     hour: (hour) => (2 + hour) % 4,
-    //     minute: minute => 0 - minute,
-    //     notification: {
-    //         body: 'Grab Seats in {t} minutes!'
-    //     }
-    // },
-    // [eventNames.CONCERT_STARTS]: {
-    //     name: 'Concert Starts',
-    //     key: eventNames.CONCERT_STARTS,
-    //     type: eventTypes.CONCERT,
-    //     period: 4 * 60,
-    //     hour: (hour) => (2 + hour) % 4,
-    //     minute: minute => 10 - minute,
-    //     notification: {
-    //         body: 'Concert Starts in {t} minutes!'
-    //     }
-    // },
+    [eventNames.CONCERT_GRABSEATS]: {
+        name: 'Grab Seats',
+        key: eventNames.CONCERT_GRABSEATS,
+        type: eventTypes.CONCERT,
+        period: 4 * 60,
+        hour: (hour) => (2 + hour) % 4,
+        minute: minute => 0 - minute,
+        notification: {
+            body: 'Grab Seats in {t} minutes!'
+        }
+    },
+    [eventNames.CONCERT_STARTS]: {
+        name: 'Concert Starts',
+        key: eventNames.CONCERT_STARTS,
+        type: eventTypes.CONCERT,
+        period: 4 * 60,
+        hour: (hour) => (2 + hour) % 4,
+        minute: minute => 10 - minute,
+        notification: {
+            body: 'Concert Starts in {t} minutes!'
+        }
+    },
 };
 
 const getCurrentDay = currentDate => parseInt(getFormattedSkyTime(currentDate, 'i'));
