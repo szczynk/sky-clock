@@ -50,24 +50,39 @@ function getShardData(daysToAdd = 0) {
       seconds: 40,
     });
     const shardEnd = add(shardStart, duration);
-    const shardEarlySky = sub(shardStart, earlySkyOffset);
-    const shardAtGate = sub(shardStart, gateShardOffset);
-    return { shardEarlySky, shardAtGate, shardStart, shardEnd };
+    // const shardEarlySky = sub(shardStart, earlySkyOffset);
+    // const shardAtGate = sub(shardStart, gateShardOffset);
+    return {
+      // shardEarlySky,
+      // shardAtGate,
+      shardStart,
+      shardEnd
+    };
   }).reduceRight(
-    (acc, { shardStart, shardEnd, shardEarlySky, shardAtGate }, idx) =>
+    (acc, {
+      // shardEarlySky,
+      // shardAtGate,
+      shardStart,
+      shardEnd
+    }, idx) =>
       idx >= 3
         ? acc
         : {
+            // shardEarlySky: isAfter(now, shardEarlySky)
+            //   ? acc.shardEarlySky
+            //   : shardEarlySky,
+            // shardAtGate: isAfter(now, shardAtGate)
+            //   ? acc.shardAtGate
+            //   : shardAtGate,
             shardStart: isAfter(now, shardStart) ? acc.shardStart : shardStart,
-            shardEnd: isAfter(now, shardEnd) ? acc.shardEnd : shardEnd,
-            shardEarlySky: isAfter(now, shardEarlySky)
-              ? acc.shardEarlySky
-              : shardEarlySky,
-            shardAtGate: isAfter(now, shardAtGate)
-              ? acc.shardAtGate
-              : shardAtGate,
+            shardEnd: isAfter(now, shardEnd) ? acc.shardEnd : shardEnd
           },
-    { shardStart: null, shardEnd: null, shardEarlySky: null, shardAtGate: null }
+    {
+      // shardEarlySky: null,
+      // shardAtGate: null,
+      shardStart: null,
+      shardEnd: null
+    }
   );
 
   const sortedDates = Object.entries(nextByParts)
@@ -164,8 +179,8 @@ function ShardRows({ partsKey, date }) {
   const name = {
     shardStart: "Shard Lands",
     shardEnd: "Shard Ends",
-    // shardEarlySky: "Early Shard Sky",
-    // shardAtGate: "Gate Shard",
+    shardEarlySky: "Early Shard Sky",
+    shardAtGate: "Gate Shard",
   }[partsKey];
 
   const notificationKey = `${partsKey}-lastNotification`;
