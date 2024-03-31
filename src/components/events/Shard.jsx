@@ -164,8 +164,8 @@ function ShardRows({ partsKey, date }) {
   const name = {
     shardStart: "Shard Lands",
     shardEnd: "Shard Ends",
-    shardEarlySky: "Early Shard Sky",
-    shardAtGate: "Gate Shard",
+    // shardEarlySky: "Early Shard Sky",
+    // shardAtGate: "Gate Shard",
   }[partsKey];
 
   const notificationKey = `${partsKey}-lastNotification`;
