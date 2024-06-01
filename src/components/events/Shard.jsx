@@ -9,7 +9,7 @@ import {
   startOfDay,
   addDays,
   add,
-  sub,
+  // sub,
   isAfter,
   compareAsc,
   intervalToDuration,
@@ -17,10 +17,10 @@ import {
 } from "date-fns";
 
 const duration = { hours: 3, minutes: 51, seconds: 20 };
-const earlySkyOffset = { minutes: 40, seconds: 50 };
-const gateShardOffset = { minutes: 8, seconds: 40 };
+// const earlySkyOffset = { minutes: 40, seconds: 50 };
+// const gateShardOffset = { minutes: 8, seconds: 40 };
 
-function getShardData(daysToAdd = 0) {
+function getShardData(daysToAdd = 0, filterType = '') {
   const now = getNowInSkyTime();
 
   const today = startOfDay(addDays(now, daysToAdd));
@@ -37,7 +37,14 @@ function getShardData(daysToAdd = 0) {
   ][minsIndex].includes(dayOfWk);
 
   if (!haveShard) {
-    return { noShard: true, ...getShardData(daysToAdd + 1) };
+    return { noShard: true, ...getShardData(daysToAdd + 1, filterType) };
+  }
+
+  if (
+    (filterType === 'red' && !isRed) ||
+    (filterType === 'black' && isRed)
+  ) {
+    return { noShard: true, ...getShardData(daysToAdd + 1, filterType) };
   }
 
   const minsFromResets = [468, 148, 218, 118, 138][minsIndex];
@@ -90,7 +97,7 @@ function getShardData(daysToAdd = 0) {
     .sort(([, a], [, b]) => compareAsc(a, b));
 
   if (sortedDates.length === 0) {
-    return { noMore: true, ...getShardData(daysToAdd + 1) };
+    return { noMore: true, ...getShardData(daysToAdd + 1, filterType) };
   }
 
   const realmIdx = (dayOfMth - 1) % 5;
@@ -140,7 +147,7 @@ function getShardData(daysToAdd = 0) {
         Treehouse: "3.5",
         "Village of Dreams": "2.5",
         "Jellyfish Cove": "3.5",
-      }[map] ?? ["2.0", "2.5", "3.0"][minsIndex]) + " Ascended Candles";
+      }[map] ?? ["2.0", "2.5", "3.0"][minsIndex]) + " ACs";
 
   return { isRed, realm, map, rewards, sortedDates, daysAdded: daysToAdd };
 }
@@ -251,18 +258,24 @@ function ShardRows({ partsKey, date }) {
 
 
 function Shard() {
+  const [shardType, setShardType] = useLocalStorage("shard-type", "");
+
+  const handleShardChange = (e) => {
+    setShardType(e.target.value);
+  };
+
   const [shardData, setShardData] = useState(getShardData());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const newData = getShardData();
+      const newData = getShardData(0, shardType);
       setShardData(newData);
     }, 1000); // Update every second
 
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [shardType]);
 
   const {
     noShard,
@@ -286,7 +299,20 @@ function Shard() {
   return (
     <>
       <tr className="heading">
-        <td colSpan="4">Shard Eruptions</td>
+        <td colSpan="3">Shard Eruptions</td>
+        <td colSpan="1">
+          <select
+            value={shardType}
+            onChange={handleShardChange}
+            style={{
+              transform: "scale(1.25)",
+            }}
+          >
+            <option value="">All</option>
+            <option value="red">Red</option>
+            <option value="black">Black</option>
+          </select>
+        </td>
       </tr>
       {noMore && (
         <tr className="shard-status">

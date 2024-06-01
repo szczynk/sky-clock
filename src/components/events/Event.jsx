@@ -69,8 +69,6 @@ function Event({ eventData, eventDataDailyReset }) {
     currentDate: currentDateDailyReset,
     offsetData: {
       date: dateDailyReset,
-      hoursOffset: hoursOffsetDailyReset,
-      minutesOffset: minutesOffsetDailyReset,
     },
   } = eventDataDailyReset;
 
@@ -110,51 +108,48 @@ function Event({ eventData, eventDataDailyReset }) {
   }
 
   const todoKey1 = `${key}-isDone1`;
-  const [isDone1, setTodo1] = useLocalStorage(todoKey1, false);
+  const [todo1, setTodo1] = useLocalStorage(todoKey1, { isDone: false, date: '' });
   const toggleTodo1 = () => {
-    setTodo1(!isDone1);
+    setTodo1({
+      isDone: !todo1.isDone,
+      date: !todo1.isDone ? Date.now() : ''
+  });
   };
 
+  
   const todoKey2 = `${key}-isDone2`;
-  const [isDone2, setTodo2] = useLocalStorage(todoKey2, false);
+  const [todo2, setTodo2] = useLocalStorage(todoKey2, { isDone: false, date: '' });
   const toggleTodo2 = () => {
-    setTodo2(!isDone2);
+    setTodo1({
+      isDone: !todo2.isDone,
+      date: !todo2.isDone ? Date.now() : ''
+  });
   };
 
   (function resetTodo() {
-    const minutesToNextDailyReset =
-      hoursOffsetDailyReset * 60 + minutesOffsetDailyReset;
-    const resetNotificationWindow = notification?.minutes ?? 5;
-
     const shouldResetTodos =
-      isDone1 &&
-      minutesToNextDailyReset <= resetNotificationWindow &&
-      lastNotification < currentDateDailyReset.getTime() &&
-      lastNotification <
-        dateDailyReset.getTime() - (resetNotificationWindow + 1) * 60000;
-
+      todo1.isDone &&
+      currentDateDailyReset.getTime() / (1_000_000) >= (dateDailyReset.getTime() - 1_000_000) / (1_000_000)
+    
     if (shouldResetTodos) {
-      console.log(`${todoKey1} notification`);
+      console.log(`reset ${todoKey1} notification`);
       setTodo1(false);
     }
 
-    const shouldResetTodos2 =
-      isDone2 &&
-      minutesToNextDailyReset <= resetNotificationWindow &&
-      lastNotification < currentDateDailyReset.getTime() &&
-      lastNotification <
-        dateDailyReset.getTime() - (resetNotificationWindow + 1) * 60000;
+    const shouldResetTodos2 = 
+      todo2.isDone &&
+      currentDateDailyReset.getTime() / (1_000_000) >= (dateDailyReset.getTime() - 1_000_000) / (1_000_000)
 
     if (shouldResetTodos2) {
-      console.log(`${todoKey2} notification`);
+      console.log(`reset ${todoKey2} notification`);
       setTodo2(false);
     }
   })();
 
   const checkboxes = type === eventTypes.WAX && (
     <Checkboxes
-      isDone1={isDone1}
-      isDone2={isDone2}
+      isDone1={todo1.isDone}
+      isDone2={todo2.isDone}
       toggleTodo1={toggleTodo1}
       toggleTodo2={toggleTodo2}
     />
