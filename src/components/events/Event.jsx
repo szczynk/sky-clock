@@ -113,17 +113,17 @@ function Event({ eventData, eventDataDailyReset }) {
     setTodo1({
       isDone: !todo1.isDone,
       date: !todo1.isDone ? Date.now() : ''
-  });
+    });
   };
 
   
   const todoKey2 = `${key}-isDone2`;
   const [todo2, setTodo2] = useLocalStorage(todoKey2, { isDone: false, date: '' });
   const toggleTodo2 = () => {
-    setTodo1({
+    setTodo2({
       isDone: !todo2.isDone,
       date: !todo2.isDone ? Date.now() : ''
-  });
+    });
   };
 
   (function resetTodo() {
@@ -133,7 +133,7 @@ function Event({ eventData, eventDataDailyReset }) {
     
     if (shouldResetTodos) {
       console.log(`reset ${todoKey1} notification`);
-      setTodo1(false);
+      setTodo1({ isDone: false, date: '' });
     }
 
     const shouldResetTodos2 = 
@@ -142,7 +142,7 @@ function Event({ eventData, eventDataDailyReset }) {
 
     if (shouldResetTodos2) {
       console.log(`reset ${todoKey2} notification`);
-      setTodo2(false);
+      setTodo2({ isDone: false, date: '' });
     }
   })();
 
