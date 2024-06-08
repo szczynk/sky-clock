@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import "./Shard.css";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { getNowInSkyTime } from "../../date-tools/regional-time";
@@ -20,7 +22,7 @@ const duration = { hours: 3, minutes: 51, seconds: 20 };
 // const earlySkyOffset = { minutes: 40, seconds: 50 };
 // const gateShardOffset = { minutes: 8, seconds: 40 };
 
-function getShardData(daysToAdd = 0, filterType = '') {
+function getShardData(daysToAdd = 0, filterType = "") {
   const now = getNowInSkyTime();
 
   const today = startOfDay(addDays(now, daysToAdd));
@@ -40,10 +42,7 @@ function getShardData(daysToAdd = 0, filterType = '') {
     return { noShard: true, ...getShardData(daysToAdd + 1, filterType) };
   }
 
-  if (
-    (filterType === 'red' && !isRed) ||
-    (filterType === 'black' && isRed)
-  ) {
+  if ((filterType === "red" && !isRed) || (filterType === "black" && isRed)) {
     return { noShard: true, ...getShardData(daysToAdd + 1, filterType) };
   }
 
@@ -63,15 +62,19 @@ function getShardData(daysToAdd = 0, filterType = '') {
       // shardEarlySky,
       // shardAtGate,
       shardStart,
-      shardEnd
+      shardEnd,
     };
   }).reduceRight(
-    (acc, {
-      // shardEarlySky,
-      // shardAtGate,
-      shardStart,
-      shardEnd
-    }, idx) =>
+    (
+      acc,
+      {
+        // shardEarlySky,
+        // shardAtGate,
+        shardStart,
+        shardEnd,
+      },
+      idx
+    ) =>
       idx >= 3
         ? acc
         : {
@@ -82,13 +85,13 @@ function getShardData(daysToAdd = 0, filterType = '') {
             //   ? acc.shardAtGate
             //   : shardAtGate,
             shardStart: isAfter(now, shardStart) ? acc.shardStart : shardStart,
-            shardEnd: isAfter(now, shardEnd) ? acc.shardEnd : shardEnd
+            shardEnd: isAfter(now, shardEnd) ? acc.shardEnd : shardEnd,
           },
     {
       // shardEarlySky: null,
       // shardAtGate: null,
       shardStart: null,
-      shardEnd: null
+      shardEnd: null,
     }
   );
 
@@ -101,52 +104,52 @@ function getShardData(daysToAdd = 0, filterType = '') {
   }
 
   const realmIdx = (dayOfMth - 1) % 5;
-  const realm = [
-    "Daylight Prairie",
-    "Hidden Forest",
-    "Valley Of Triumph",
-    "Golden Wasteland",
-    "Vault Of Knowledge",
-  ][realmIdx];
+  const realm = ["prairie", "forest", "valley", "wasteland", "vault"][realmIdx];
   const map = [
     [
-      "Cave",
-      "Bird Nest",
-      "Sanctuary Island",
-      "Butterfly Field",
-      "Village Islands / Koi Pond",
+      "prairie.cave",
+      "prairie.bird",
+      "prairie.island",
+      "prairie.butterfly",
+      "prairie.village",
     ],
     [
-      "Forest End / Garden",
-      "Treehouse",
-      "Elevated Clearing",
-      "Forest Brook",
-      "Boneyard",
+      "forest.end",
+      "forest.tree",
+      "forest.sunny",
+      "forest.brook",
+      "forest.boneyard",
     ],
     [
-      "Village of Dreams",
-      "Village of Dreams",
-      "Hermit valley",
-      "Ice Rink",
-      "Ice Rink",
+      "valley.dreams",
+      "valley.dreams",
+      "valley.hermit",
+      "valley.rink",
+      "valley.rink",
     ],
-    ["Graveyard", "Crabfield", "Forgotten Ark", "Broken Temple", "Battlefield"],
     [
-      "Jellyfish Cove",
-      "Jellyfish Cove",
-      "Jellyfish Cove",
-      "Starlight Desert",
-      "Starlight Desert",
+      "wasteland.graveyard",
+      "wasteland.crab",
+      "wasteland.ark",
+      "wasteland.temple",
+      "wasteland.battlefield",
+    ],
+    [
+      "vault.jelly",
+      "vault.jelly",
+      "vault.jelly",
+      "vault.starlight",
+      "vault.starlight",
     ],
   ][realmIdx][minsIndex];
 
   const rewards = !isRed
     ? `200 wax`
     : ({
-        "Forest End / Garden": "2.5",
-        Treehouse: "3.5",
-        "Village of Dreams": "2.5",
-        "Jellyfish Cove": "3.5",
+        "forest.end": "2.5",
+        "forest.tree": "3.5",
+        "valley.dreams": "2.5",
+        "vault.jelly": "3.5",
       }[map] ?? ["2.0", "2.5", "3.0"][minsIndex]) + " ACs";
 
   return { isRed, realm, map, rewards, sortedDates, daysAdded: daysToAdd };
@@ -163,7 +166,7 @@ function buildNotification(eventName, minutesToNextEvent) {
   return notification;
 }
 
-// million-ignore 
+// million-ignore
 function ShardRows({ partsKey, date }) {
   const skyNow = getNowInSkyTime();
   const duration = intervalToDuration({ start: skyNow, end: date });
@@ -256,6 +259,30 @@ function ShardRows({ partsKey, date }) {
   );
 }
 
+function SimpleDialog(props) {
+  const { onClose, map, open } = props;
+
+  const mapSrc = `images/map_clement/${map}.webp`;
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  return (
+    <Dialog onClose={handleClose} open={open}>
+      <img
+        src={mapSrc}
+        alt={map}
+        style={{
+          height: "100%",
+          width: "auto",
+          maxHeight: "100%",
+          objectFit: "contain",
+        }}
+      />
+    </Dialog>
+  );
+}
 
 function Shard() {
   const [shardType, setShardType] = useLocalStorage("shard-type", "");
@@ -295,6 +322,46 @@ function Shard() {
         .map((_, days) => format(addDays(getNowInSkyTime(), days), "do")),
     [daysAdded]
   );
+
+  const realmName = {
+    prairie: "Daylight Prairie",
+    forest: "Hidden Forest",
+    valley: "Valley Of Triumph",
+    wasteland: "Golden Wasteland",
+    vault: "Vault Of Knowledge",
+  };
+
+  const mapName = {
+    "prairie.cave": "Cave",
+    "prairie.bird": "Bird Nest",
+    "prairie.island": "Sanctuary Island",
+    "prairie.butterfly": "Butterfly Field",
+    "prairie.village": "Village Islands / Koi Pond",
+    "forest.end": "Forest End / Garden",
+    "forest.tree": "Treehouse",
+    "forest.sunny": "Elevated Clearing",
+    "forest.brook": "Forest Brook",
+    "forest.boneyard": "Boneyard",
+    "valley.dreams": "Village of Dreams",
+    "valley.hermit": "Hermit valley",
+    "valley.rink": "Ice Rink",
+    "wasteland.graveyard": "Graveyard",
+    "wasteland.crab": "Crabfield",
+    "wasteland.ark": "Forgotten Ark",
+    "wasteland.temple": "Broken Temple",
+    "wasteland.battlefield": "Battlefield",
+    "vault.jelly": "Jellyfish Cove",
+    "vault.starlight": "Starlight Desert",
+  };
+
+  const [open, setOpen] = useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <>
@@ -341,7 +408,7 @@ function Shard() {
       <tr className="shard-detail">
         <td colSpan="2">
           <strong>Realm: </strong>
-          {realm}
+          {realmName[realm]}
         </td>
         <td colSpan="2">
           <strong>Color: </strong>
@@ -351,7 +418,10 @@ function Shard() {
       <tr className="shard-detail">
         <td colSpan="2">
           <strong>Map: </strong>
-          {map}
+          <Button type="button" variant="outlined" onClick={handleClickOpen}>
+            {mapName[map]}
+          </Button>
+          <SimpleDialog map={map} open={open} onClose={handleClose} />
         </td>
         <td colSpan="2">
           <strong>Rewards: </strong>

@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 
@@ -48,7 +49,7 @@ function Checkboxes({ isDone1, isDone2, toggleTodo1, toggleTodo2 }) {
   );
 }
 
-// million-ignore 
+// million-ignore
 function Event({ eventData, eventDataDailyReset }) {
   const { key, offsetData, currentDate, name, type, notification } = eventData;
   const { date, hour, minute, hoursOffset, minutesOffset } = offsetData;
@@ -67,9 +68,7 @@ function Event({ eventData, eventDataDailyReset }) {
 
   const {
     currentDate: currentDateDailyReset,
-    offsetData: {
-      date: dateDailyReset,
-    },
+    offsetData: { date: dateDailyReset },
   } = eventDataDailyReset;
 
   (function showNotification() {
@@ -108,43 +107,68 @@ function Event({ eventData, eventDataDailyReset }) {
   }
 
   const todoKey1 = `${key}-isDone1`;
-  const [todo1, setTodo1] = useLocalStorage(todoKey1, { isDone: false, date: '' });
+  const [todo1, setTodo1] = useLocalStorage(todoKey1, {
+    isDone: false,
+    date: "",
+  });
   const toggleTodo1 = () => {
     setTodo1({
       isDone: !todo1.isDone,
-      date: !todo1.isDone ? Date.now() : ''
+      date: !todo1.isDone ? Date.now() : "",
     });
   };
 
-  
   const todoKey2 = `${key}-isDone2`;
-  const [todo2, setTodo2] = useLocalStorage(todoKey2, { isDone: false, date: '' });
+  const [todo2, setTodo2] = useLocalStorage(todoKey2, {
+    isDone: false,
+    date: "",
+  });
   const toggleTodo2 = () => {
     setTodo2({
       isDone: !todo2.isDone,
-      date: !todo2.isDone ? Date.now() : ''
+      date: !todo2.isDone ? Date.now() : "",
     });
   };
 
-  (function resetTodo() {
-    const shouldResetTodos =
-      todo1.isDone &&
-      currentDateDailyReset.getTime() / (1_000_000) >= (dateDailyReset.getTime() - 1_000_000) / (1_000_000)
-    
+  const resetTodo = useCallback(() => {
+    const isResetTime =
+      currentDateDailyReset.getTime() / 1_000_000 >=
+      (dateDailyReset.getTime() - 1_000_000) / 1_000_000;
+
+    const shouldResetTodos = todo1.isDone && isResetTime;
+
     if (shouldResetTodos) {
       console.log(`reset ${todoKey1} notification`);
-      setTodo1({ isDone: false, date: '' });
+      setTodo1({ isDone: false, date: "" });
     }
 
-    const shouldResetTodos2 = 
-      todo2.isDone &&
-      currentDateDailyReset.getTime() / (1_000_000) >= (dateDailyReset.getTime() - 1_000_000) / (1_000_000)
+    const shouldResetTodos2 = todo2.isDone && isResetTime;
 
     if (shouldResetTodos2) {
       console.log(`reset ${todoKey2} notification`);
-      setTodo2({ isDone: false, date: '' });
+      setTodo2({ isDone: false, date: "" });
     }
-  })();
+  }, [
+    currentDateDailyReset,
+    dateDailyReset,
+    setTodo1,
+    setTodo2,
+    todo1.isDone,
+    todo2.isDone,
+    todoKey1,
+    todoKey2,
+  ]);
+
+  useEffect(() => {
+    // Check and reset todos on component mount
+    resetTodo();
+
+    const interval = setInterval(() => {
+      resetTodo();
+    }, 1000); // Check every second (you can adjust the interval as needed)
+
+    return () => clearInterval(interval);
+  }, [resetTodo]);
 
   const checkboxes = type === eventTypes.WAX && (
     <Checkboxes

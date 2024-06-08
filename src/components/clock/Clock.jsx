@@ -4,19 +4,28 @@ import { getLocalTime, getSkyTime } from "../../date-tools/regional-time";
 import "./Clock.css";
 
 export default function render({ date }) {
-    const { hour: skyHour, minute: skyMinutes, second: skySeconds } = getSkyTime(date);
-    const { hour: localHour, minute: localMinutes, second: localSeconds } = getLocalTime(date);
+  const {
+    hour: skyHour,
+    minute: skyMinutes,
+    second: skySeconds,
+  } = getSkyTime(date);
 
-    return (
-        <div className="clock">
-            <div id="sky-standard-time" className="clock-display sky">
-                <span className="label">Sky Time:</span>
-                <Time hour={skyHour} minute={skyMinutes} second={skySeconds} />
-            </div>
-            <div id="local-time" className="clock-display local">
-                <span className="label">Local Time:</span>
-                <Time hour={localHour} minute={localMinutes} second={localSeconds} />
-            </div>
-        </div>
-    );
+  const {
+    hour: localHour,
+    minute: localMinutes,
+    second: localSeconds,
+  } = getLocalTime(date);
+
+  return (
+    <div className="clock">
+      <div id="sky-standard-time" className="clock-display sky">
+        <span className="label">Sky Time:</span>
+        <Time hour={skyHour} minute={skyMinutes} second={skySeconds} />
+      </div>
+      <div id="local-time" className="clock-display local">
+        <span className="label">Local Time:</span>
+        <Time hour={localHour} minute={localMinutes} second={localSeconds} />
+      </div>
+    </div>
+  );
 }

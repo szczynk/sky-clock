@@ -13,19 +13,27 @@ export default function render({ currentDate }) {
   const daysUntilReset =
     currentDay === 0 && minutesToMidnight < 24 * 60 ? 7 : (7 - currentDay) % 7; // Use modulo to ensure the result is within 0-6
 
-  const nextEventDate = add(currentDate, { days: daysUntilReset, minutes: minutesToMidnight });
+  const nextEventDate = add(currentDate, {
+    days: daysUntilReset,
+    minutes: minutesToMidnight,
+  });
 
   // Calculate the difference in seconds
   const diffInSeconds = differenceInSeconds(nextEventDate, currentDate);
 
   // Calculate the remaining days, hours, and minutes
   const remainingDays = Math.floor(diffInSeconds / (24 * 60 * 60));
-  const remainingHours = Math.floor((diffInSeconds % (24 * 60 * 60)) / (60 * 60));
+  const remainingHours = Math.floor(
+    (diffInSeconds % (24 * 60 * 60)) / (60 * 60)
+  );
   const remainingMinutes = Math.floor((diffInSeconds % (60 * 60)) / 60);
 
   return (
     <div id="weekly-reset">
-      {`Next weekly reset on ${format(nextEventDate, "EEEE")} at ${format(nextEventDate, "HH:mm")}`}
+      {`Next weekly reset on ${format(nextEventDate, "EEEE")} at ${format(
+        nextEventDate,
+        "HH:mm"
+      )}`}
       <br />
       {`Time remaining: ${remainingDays}d ${remainingHours}h ${remainingMinutes}m`}
     </div>

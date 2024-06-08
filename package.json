@@ -14,9 +14,12 @@
     "docker-start": "npm run docker-build && npm run docker-run"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mui/material": "^5.15.19",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
     "million": "^2.5.13",
@@ -30,7 +33,7 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
-    "eslint": "^8.47.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",

@@ -1,31 +1,32 @@
 .clock-display {
-    float: left;
-    width: 50%;
-    text-align: center;
-    font-size: 2.2em;
-    padding-top: 0.8em;
-    padding-bottom: 0.8em;
+  float: left;
+  width: 50%;
+  text-align: center;
+  font-size: 2.2em;
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
 }
 
-.clock-display > .label, .clock-display > .time {
-    display: block;
-    color: var(--color-text-accent-dark);
+.clock-display > .label,
+.clock-display > .time {
+  display: block;
+  color: var(--color-text-accent-dark);
 }
 
 div.clock-display > span.label {
-    color: var(--color-text-accent);
+  color: var(--color-text-accent);
 }
 
 .clock::after {
-    content: "";
-    clear: both;
-    display: table;
+  content: "";
+  clear: both;
+  display: table;
 }
 
 @media screen and (max-width: 600px) {
-    .clock-display {
-        float: none;
-        text-align: center;
-        width: 100%;
-    }
+  .clock-display {
+    float: none;
+    text-align: center;
+    width: 100%;
+  }
 }

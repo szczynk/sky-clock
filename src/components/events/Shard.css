@@ -1,4 +1,5 @@
-table tbody tr.shard-detail, table tbody tr.shard-status {
+table tbody tr.shard-detail,
+table tbody tr.shard-status {
   background-color: var(--color-tr-head);
 }
 

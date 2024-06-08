@@ -9,7 +9,7 @@ import {
 } from "../../event-data/event-data";
 import { getEventOffset } from "../../date-tools/event-time-offset";
 
-// million-ignore 
+// million-ignore
 function GroupHeader({ group }) {
   return (
     <tr className="heading" key={group}>
