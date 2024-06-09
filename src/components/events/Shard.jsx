@@ -274,8 +274,8 @@ function SimpleDialog(props) {
         src={mapSrc}
         alt={map}
         style={{
-          height: "100%",
-          width: "auto",
+          height: "auto",
+          width: "100%",
           maxHeight: "100%",
           objectFit: "contain",
         }}
@@ -421,7 +421,7 @@ function Shard() {
           <Button type="button" variant="outlined" onClick={handleClickOpen}>
             {mapName[map]}
           </Button>
-          <SimpleDialog map={map} open={open} onClose={handleClose} />
+          <SimpleDialog map={map} open={open} onClose={handleClose} style={{ height: "calc(100% - 64px)", backgroundColor: "var(--color-bg-primary)" }} />
         </td>
         <td colSpan="2">
           <strong>Rewards: </strong>
