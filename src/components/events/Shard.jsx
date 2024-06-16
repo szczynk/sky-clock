@@ -206,7 +206,7 @@ function ShardRows({ partsKey, date }) {
   );
 
   (function showNotification() {
-    const minutesToNextEvent = hours * 60 + minutes;
+    const minutesToNextEvent = days * 1440 + hours * 60 + minutes;
     const notificationWindow = 5;
 
     const shouldNotify =
@@ -421,7 +421,15 @@ function Shard() {
           <Button type="button" variant="outlined" onClick={handleClickOpen}>
             {mapName[map]}
           </Button>
-          <SimpleDialog map={map} open={open} onClose={handleClose} style={{ height: "calc(100% - 64px)", backgroundColor: "var(--color-bg-primary)" }} />
+          <SimpleDialog
+            map={map}
+            open={open}
+            onClose={handleClose}
+            style={{
+              height: "calc(100% - 64px)",
+              backgroundColor: "var(--color-bg-primary)",
+            }}
+          />
         </td>
         <td colSpan="2">
           <strong>Rewards: </strong>
